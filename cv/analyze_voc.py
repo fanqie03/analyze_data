@@ -62,10 +62,10 @@ def parse_single_voc(ann_file, root=None, min_size=None):
 
         bnd_box = obj.find('bndbox')
         bbox = [
-            int(bnd_box.find('xmin').text),
-            int(bnd_box.find('ymin').text),
-            int(bnd_box.find('xmax').text),
-            int(bnd_box.find('ymax').text)
+            int(float(bnd_box.find('xmin').text)),
+            int(float(bnd_box.find('ymin').text)),
+            int(float(bnd_box.find('xmax').text)),
+            int(float(bnd_box.find('ymax').text))
         ]
         ignore = False
 
