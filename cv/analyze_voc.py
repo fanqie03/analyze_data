@@ -24,6 +24,9 @@ title =['filename',
         'ymin',
         'xmax',
         'ymax',
+        'ratio',
+        'bbox_scale_width',
+        'bbox_scale_height',
         'ignore',
         'difficult']
 
@@ -82,6 +85,9 @@ def parse_single_voc(ann_file, root=None, min_size=None):
             'ymin': bbox[1],
             'xmax': bbox[2],
             'ymax': bbox[3],
+            'ratio': w/h,
+            'bbox_scale_width': w / width,
+            'bbox_scale_height': h / height,
             'ignore': ignore,
             'difficult': difficult
         }
@@ -101,6 +107,12 @@ def analyze(table: pd.DataFrame, export):
     pfr.to_file(export)
 
 
+# def draw(rows):
+#     img = cv2.imread(rows[0]['filename'])
+#     for row in rows:
+#         cv2.putText()
+
+
 def main():
     args = parse_args()
 
@@ -112,10 +124,10 @@ def main():
         rows = parse_single_voc(str(ann_folder))
         table.extend(rows)
 
-        if args.show and len(rows) > 0:
-            img = cv2.imread(rows[0]['filename'])
-            for row in rows:
-                cv2.putText()
+        # if args.show and len(rows) > 0:
+        #     img = cv2.imread(rows[0]['filename'])
+        #     for row in rows:
+        #         cv2.putText()
 
 
     table = np.asarray(table)
