@@ -27,6 +27,7 @@ title =['filename',
         'ratio',
         'bbox_scale_width',
         'bbox_scale_height',
+        'scale(area)',
         'ignore',
         'difficult']
 
@@ -88,6 +89,7 @@ def parse_single_voc(ann_file, root=None, min_size=None):
             'ratio': w/h,
             'bbox_scale_width': w / width,
             'bbox_scale_height': h / height,
+            'scale(area)': (w*h)/(width*height),
             'ignore': ignore,
             'difficult': difficult
         }
