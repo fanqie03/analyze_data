@@ -24,3 +24,7 @@ image information json format, like mmdetection
     }
 },
 ```
+
+### TODO:
+
+- [ ] combine rename, relabel, rmlabel, robust, split, show 
