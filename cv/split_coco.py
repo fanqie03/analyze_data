@@ -17,9 +17,12 @@ def parse_args():
     return args
 
 
-def add_suffix(path, ann):
-    raw_file = Path(path)
-    return raw_file.parent / (raw_file.stem+'-'+ann+raw_file.suffix)
+def add_suffix_and_export(content, source_file, output_path, ann):
+    raw_file = Path(source_file)
+    output_path = Path(output_path)
+    output_file = output_path / (raw_file.stem+'-'+ann+raw_file.suffix)
+    with open(output_file, 'w') as f:
+         json.dump(content, f, indent=2)
 
 # def export(dic, args):
 #     with open('')
@@ -40,6 +43,11 @@ def create_index(content, id_name):
     ret = collections.OrderedDict(ret)
     return ret
 
+
+def part_merge(part):
+    ret = []
+    [ret.extend(x[1]) for x in part]
+    return ret
 
 
 def main():
@@ -68,31 +76,33 @@ def main():
     trainval_images_part = all_images[:stride[0]+stride[1]]
     test_images_part = all_images[stride[0]+stride[1]:]
 
-    train_annotations_part = all_images[:stride[0]]
-    val_annotations_part = all_images[stride[0]: stride[0]+stride[1]]
-    trainval_annotations_part = all_images[:stride[0]+stride[1]]
-    test_annotations_part = all_images[stride[0]+stride[1]:]
+    train_images_part = part_merge(train_images_part)
+    val_images_part = part_merge(val_images_part)
+    trainval_images_part = part_merge(trainval_images_part)
+    test_images_part = part_merge(test_images_part)
+
+    train_annotations_part = all_annotations[:stride[0]]
+    val_annotations_part = all_annotations[stride[0]: stride[0]+stride[1]]
+    trainval_annotations_part = all_annotations[:stride[0]+stride[1]]
+    test_annotations_part = all_annotations[stride[0]+stride[1]:]
+
+    train_annotations_part = part_merge(train_annotations_part)
+    val_annotations_part = part_merge(val_annotations_part)
+    trainval_annotations_part = part_merge(trainval_annotations_part)
+    test_annotations_part = part_merge(test_annotations_part)
 
     train_dict = dict(info=all_['info'], licenses=all_['licenses'], categories=all_['categories'], images=train_images_part, annotations=train_annotations_part)
-    val_dict = dict(base).update({'images': val_images_part, 'annotations': val_annotations_part})
-    trainval_dict = dict(base).update({'images': trainval_images_part, 'annotations': trainval_annotations_part})
-    test_dict = dict(base).update({'images': test_images_part, 'annotations': test_annotations_part})
+    val_dict = dict(info=all_['info'], licenses=all_['licenses'], categories=all_['categories'], images=val_images_part, annotations=val_annotations_part)
+    trainval_dict = dict(info=all_['info'], licenses=all_['licenses'], categories=all_['categories'], images=trainval_images_part, annotations=trainval_annotations_part)
+    test_dict = dict(info=all_['info'], licenses=all_['licenses'], categories=all_['categories'], images=test_images_part, annotations=test_annotations_part)
 
-
-
+    add_suffix_and_export(train_dict, args.source_file, args.output_dir, 'train')
+    add_suffix_and_export(val_dict, args.source_file, args.output_dir, 'val')
+    add_suffix_and_export(trainval_dict, args.source_file, args.output_dir, 'trainval')
+    add_suffix_and_export(test_dict, args.source_file, args.output_dir, 'test')
+    add_suffix_and_export(all_, args.source_file, args.output_dir, 'raw')
 
     pass
-
-    # train_part = files[:stride[0]]
-    # val_part = files[stride[0]: stride[0]+stride[1]]
-    # train_val_part = files[:stride[0]+stride[1]]
-    # test_part = files[stride[0]+stride[1]:]
-    #
-    # parts = [train_part, val_part, train_val_part, test_part]
-    # texts = ['train.txt', 'val.txt', 'trainval.txt', 'test.txt']
-    # for part, txt in zip(parts, texts):
-    #     export(part, os.path.join(args.output_dir, txt))
-
 
 if __name__ == '__main__':
     main()
