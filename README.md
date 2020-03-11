@@ -35,3 +35,7 @@ python cv/split_voc.py --source-file /datasets/pikachu-coco.json --output-dir /d
 ```bash
 python cv/extract_file_by_id.py --img_dir xxx --ann_dir xxx --target_dir xxx
 ```
+- cv/voc2coco.py - Pascal VOC数据格式转COCO数据格式脚本
+```bash
+--xml-dir /datasets/PikachuVOC/Annotations --target-dir /datasets/PikachuVOC/coco
+```
