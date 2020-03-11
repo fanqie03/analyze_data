@@ -39,3 +39,7 @@ python cv/extract_file_by_id.py --img_dir xxx --ann_dir xxx --target_dir xxx
 ```bash
 --xml-dir /datasets/PikachuVOC/Annotations --target-dir /datasets/PikachuVOC/coco
 ```
+- cv/analyze_coco.py
+```bash
+python cv/analyze_coco.py --source-file instace-train2017.json
+```
