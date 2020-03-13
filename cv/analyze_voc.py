@@ -58,7 +58,8 @@ def parse_single_voc(ann_file, root=None, min_size=None):
 
     for obj in root.findall('object'):
         name = obj.find('name').text
-        difficult = int(obj.find('difficult').text)
+        difficult = int(obj.find('difficult').text) \
+                if obj.find('difficult') is not None else 0
 
         bnd_box = obj.find('bndbox')
         bbox = [
@@ -86,7 +87,7 @@ def parse_single_voc(ann_file, root=None, min_size=None):
             'ymin': bbox[1],
             'xmax': bbox[2],
             'ymax': bbox[3],
-            'ratio': w/h,
+            'ratio': (w+1e-6)/(h+1e-6),
             'bbox_scale_width': w / width,
             'bbox_scale_height': h / height,
             'scale(area)': (w*h)/(width*height),

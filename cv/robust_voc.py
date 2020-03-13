@@ -2,8 +2,10 @@ import argparse
 import glob
 import os
 import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import Element, SubElement, ElementTree
 import cv2
 import shutil
+from pathlib import Path
 
 
 def parse_args():
@@ -56,7 +58,26 @@ def check_img(ann_dir, img_dir):
     return
 
 
-def check_shape(ann_dir, img_dir):
+def node_content(node, key, astype=None):
+    if node is None:
+        return None
+    content = node.find(key)
+    if content is None:
+        return content
+    content = content.text
+    if astype is not None:
+        content = astype(content)
+    return content
+def node_set_text(node_manager:ET.Element, node_child, text):
+    node = node_manager.find(node_child)
+    if node is None:
+        node = SubElement(node_manager, node_child)
+    if text is not None:
+        node.text = text
+    return node
+
+
+def check_bndbox(ann_dir, img_dir):
     """
     检查每张图片的shape是否和xml中的size一致
     :param ann_dir:
@@ -68,26 +89,51 @@ def check_shape(ann_dir, img_dir):
     imgs = os.path.dirname(img_dir)
     for ann in anns:
         tree = ET.parse(ann)
+        ann = Path(ann)
         root = tree.getroot()
-        size = root.find('size')
+        # size = root.find('size')
+        size = node_set_text(root, 'size', None)
 
-        width = int(size.find('width').text)
-        height = int(size.find('height').text)
-        depth = int(size.find('depth').text)
+        # width = int(size.find('width').text)
+        # height = int(size.find('height').text)
+        # depth = int(size.find('depth').text)
 
-        filename = root.find('filename').text
+        width = node_content(size, 'width', int)
+        height = node_content(size, 'height', int)
+        depth = node_content(size, 'depth', int)
+
+        # filename = root.find('filename').text
+        filename = node_content(root, 'filename', ) or ann.stem
         file_path = os.path.join(imgs, filename)
         try:
             img = cv2.imread(file_path)
             h, w, d = img.shape
             if width != w or height != h or depth != d:
                 print(ann, 'shape Inconsistent')
-                size.find('width').text = str(w)
-                size.find('height').text = str(h)
-                size.find('depth').text = str(d)
+                node_set_text(size, 'width', str(w))
+                node_set_text(size, 'height', str(h))
+                node_set_text(size, 'depth', str(d))
                 tree.write(ann)
         except Exception as e:
             print(e, ann, file_path)
+
+def check_redundent(ann_dir, img_dir):
+    """
+
+    :param ann_dir:
+    :param img_dir:
+    :return:
+    """
+    print('check redundent')
+    anns = glob.glob(ann_dir)
+    imgs = os.path.dirname(img_dir)
+    for ann in anns:
+        tree = ET.parse(ann)
+        ann = Path(ann)
+        root = tree.getroot()
+        size = node_set_text(root, 'size', None)
+
+        tree.write(ann)
 
 
 def check_ann(ann_dir, fix=False):
@@ -102,9 +148,11 @@ def check_ann(ann_dir, fix=False):
 
     for ann in anns:
         tree = ET.parse(ann)
-        root = tree.getroot()
 
-        filename = root.find('filename').text
+        root = tree.getroot()
+        ann = Path(ann)
+
+        filename = node_content(root, 'filename', ) or ann.name
         file_prefix = filename.split('.')[0]
         file_suffix = filename.split('.')[-1]
         ann_prefix = os.path.basename(ann).split('.')[0]
@@ -117,7 +165,9 @@ def check_ann(ann_dir, fix=False):
             if fix:
                 new_filename = ann_prefix + '.jpg'
                 # root.set('filename', new_filename)
-                root.find('filename').text = new_filename
+                # root.find('filename').text = new_filename
+                # root.find('filename').text = new_filename
+                node_set_text(root, 'filename', new_filename)
                 tree.write(ann)
 
 
